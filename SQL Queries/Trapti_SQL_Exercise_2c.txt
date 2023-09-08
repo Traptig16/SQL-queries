@@ -1,0 +1,186 @@
+1. Find actors who acted in film "Lost Bird"
+select actor.first_name,actor.last_name 
+from actor
+join film on actor.actor_id=film_id
+where film.title='LOST BIRD';
+
+2. Find movies of "Sci-Fi" genre
+SELECT title
+from film f
+join film_category fc on f.film_id = fc.film_id
+join category c on fc.category_id=c.category_id
+where c.name like'%Sci-Fi%';
+
+3. Find movies of actress 
+	first_name: "PENELOPE"	
+	last_name:"GUINESS"
+SELECT film.title
+FROM film
+JOIN film_actor ON film.film_id = film_actor.film_id
+JOIN actor ON film_actor.actor_id = actor.actor_id
+WHERE actor.first_name = 'PENELOPE' AND actor.last_name = 'GUINESS';
+
+4. list Genres, movies (in each Genre), actors in each movie
+select a.first_name,a.last_name,f.title,c.name 
+from actor a
+join film_actor fa on a.actor_id = fa.actor_id
+join film f on fa.film_id=f.film_id 
+join film_category fc on f.film_id = fc.film_id 
+join category c on fc.category_id=c.category_id 
+
+
+5. List films that are rented from inventory
+SELECT film.title
+FROM film
+JOIN inventory ON film.film_id = inventory.film_id
+JOIN rental ON inventory.inventory_id = rental.inventory_id;
+
+6. List genres corresponding movies rented by customer.
+SELECT c.name AS genre, f.title AS film_title, cu.first_name || ' ' || cu.last_name AS name
+FROM inventory i
+JOIN rental r ON i.inventory_id = r.inventory_id
+JOIN film f ON i.film_id = f.film_id
+JOIN film_category fc ON f.film_id = fc.film_id
+JOIN category c ON fc.category_id = c.category_id
+JOIN customer cu ON r.customer_id = cu.customer_id
+ORDER BY c.name, f.title;
+
+7. List 5 rows of customer which have renated "Horror" generes.
+SELECT DISTINCT ON (c.customer_id) c.customer_id, c.first_name || ' ' || c.last_name AS customer_name
+FROM customer c
+JOIN rental r ON c.customer_id = r.customer_id
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id
+JOIN film_category fc ON f.film_id = fc.film_id
+JOIN category c2 ON fc.category_id = c2.category_id
+WHERE c2.name = 'Horror'
+ORDER BY c.customer_id, r.rental_date
+LIMIT 5; 
+
+8. List 5 staff members who have given maximum movies on rent (best performers)
+SELECT staff.first_name, staff.last_name, COUNT(rental.rental_id) AS num_rentals
+FROM staff
+JOIN rental ON staff.staff_id = rental.staff_id
+GROUP BY staff.staff_id
+ORDER BY num_rentals DESC
+LIMIT 5;
+
+9. List top movies types Genre (by count) rented by customers.
+10. List top movies (by count) by Genre (by count) in the inventory.
+11. List of actors who have not acted in any flim.
+SELECT actor.first_name, actor.last_name
+FROM actor
+LEFT JOIN film_actor ON actor.actor_id = film_actor.actor_id
+WHERE film_actor.actor_id IS NULL;
+
+11. List of films that are not in inventory
+SELECT film.title
+FROM film
+LEFT JOIN inventory ON film.film_id = inventory.film_id
+WHERE inventory.film_id IS NULL;
+
+13. List of actors who are not in inventory
+SELECT actor.first_name, actor.last_name
+FROM actor
+LEFT JOIN film_actor ON actor.actor_id = film_actor.actor_id
+LEFT JOIN inventory ON film_actor.film_id = inventory.film_id
+WHERE inventory.film_id IS NULL;
+
+14. List of actors whose movies are not stores.
+SELECT DISTINCT a.first_name, a.last_name
+FROM actor a
+LEFT JOIN film_actor fa ON a.actor_id = fa.actor_id
+LEFT JOIN film f ON fa.film_id = f.film_id
+LEFT JOIN inventory i ON f.film_id = i.film_id
+WHERE i.film_id IS NULL;
+
+15. List of staff who have not rented movies.
+SELECT s.first_name, s.last_name
+FROM staff s
+LEFT JOIN rental r ON s.staff_id = r.staff_id;
+
+16. categories which do not have movies.
+SELECT c.name
+FROM category c
+LEFT JOIN film_category fc ON c.category_id = fc.category_id;
+
+17. Actors who acted in all movie categories
+SELECT a.first_name, a.last_name
+FROM actor a
+WHERE NOT EXISTS (
+    SELECT c.category_id
+    FROM category c
+    WHERE NOT EXISTS (
+        SELECT fc.film_id
+        FROM film_category fc
+      JOIN film f ON fc.film_id = f.film_id
+		
+        JOIN film_actor fa ON f.film_id = fa.film_id
+        WHERE fa.actor_id = a.actor_id AND fc.category_id = c.category_id
+    )
+);
+
+
+18. Actors who did NOT act in all movie categories
+SELECT actor.actor_id, actor.first_name, actor.last_name
+FROM actor
+WHERE NOT EXISTS (
+  SELECT category.category_id
+  FROM category
+  WHERE NOT EXISTS (
+    SELECT film_category.film_id
+    FROM film_category
+    JOIN film ON film.film_id = film_category.film_id
+    JOIN film_actor ON film_actor.film_id = film.film_id
+    WHERE film_category.category_id = category.category_id
+      AND film_actor.actor_id = actor.actor_id
+  )
+);
+
+19. List of stores with address, city, countries.
+SELECT store_id, address, city, country
+FROM store
+INNER JOIN address ON store.address_id = address.address_id
+INNER JOIN city ON address.city_id = city.city_id
+INNER JOIN country ON city.country_id = country.country_id;
+
+20. List of stores that do not have inventory.
+select 	s.store_id
+from store s
+left join inventory i on s.store_id = i.store_id
+where i.inventory_id is null;
+
+21. List of customers who do not have movie rentals.
+SELECT customer.first_name, customer.last_name
+FROM customer
+LEFT JOIN rental
+ON customer.customer_id = rental.customer_id
+WHERE rental.customer_id IS NULL;
+
+22. List of Customers in India with address.
+SELECT customer_id, first_name, address, address2, city, country
+FROM customer
+JOIN address ON customer.address_id = address.address_id
+JOIN city ON address.city_id = city.city_id
+JOIN country ON city.country_id = country.country_id
+WHERE country.country  like'%India%';
+
+
+23. List of Customers with address all over the world.
+SELECT customer_id, first_name, address, address2, city, country
+FROM customer
+JOIN address ON customer.address_id = address.address_id
+JOIN city ON address.city_id = city.city_id
+JOIN country ON city.country_id = country.country_id
+
+24. List of movies made in Japanese or Mandarin.
+SELECT title, language.name AS language
+FROM film
+JOIN language ON film.language_id = language.language_id
+WHERE language.name IN ('Japanese', 'Mandarin');
+
+25. List of languages with no movies.
+SELECT DISTINCT l.name AS language
+FROM language l
+LEFT JOIN film f ON l.language_id = f.language_id
+WHERE f.language_id IS NULL;

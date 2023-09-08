@@ -1,0 +1,103 @@
+--Actor table
+1. Get first_name , last_name for actors
+select first_name,last_name from actor;
+
+2. Get first_name, last_name only 5 rows.
+select first_name,last_name from actor
+limit 5;
+
+3. Get first_name, last_name of 5 actors who have been modified last
+SELECT first_name, last_name
+FROM actor
+ORDER BY last_update DESC
+LIMIT 5;
+
+4. Get top 5 repeating last_names of actors.
+select last_name from  actor
+group by last_name
+limit 5;
+
+5. Get top 6 repeating first_name of actors.
+select last_name from  actor
+group by last_name
+limit 5;
+
+
+--Film table
+6. Get count of films in table
+select count(*) from films;
+
+7. What is average movie length (use length column)
+select * from film;
+SELECT AVG(length) AS average_length
+FROM film;
+
+8. Count of movies for each rating (use rating column)
+SELECT rating, COUNT(*) AS movie_count
+FROM film
+GROUP BY rating;
+
+9. Get list of horror movies
+SELECT title
+FROM film
+WHERE LOWER(categories) LIKE '%horror%';
+
+10. Movies that contain CAT in title.
+select film_id from film where lower(title) like '%cat%';
+
+--Category
+11. How many movie categories are there?
+select count(full_text) from film;
+
+12. Are category names repeating ?
+no
+SELECT fulltext, COUNT(*) AS category_count
+FROM film
+GROUP BY fulltext
+HAVING COUNT(*) > 1;
+
+--Country & City
+13. how many countries and cities ?
+select * from country;
+SELECT COUNT(country) AS country_count
+FROM country;(109)
+select count(city) from city;(600)
+
+14. For each country get the list of cities.
+SELECT country, ARRAY_AGG(DISTINCT city ORDER BY city) AS cities
+FROM country,city
+GROUP BY country;
+
+
+--Customer
+15. Get list of active customers;
+SELECT *
+FROM customer
+WHERE active = 1;
+
+16. Do any customer share same emailID
+NO,
+SELECT email, COUNT(*) as count
+FROM customer
+GROUP BY email
+HAVING COUNT(*) > 1;
+
+17. List of customers with same lastname
+SELECT last_name, ARRAY_AGG(first_name ORDER BY first_name) AS customers
+FROM customer
+GROUP BY last_name;
+
+
+--film_category
+18. Total movies that are categoried
+SELECT COUNT(DISTINCT film_id) AS total_movies_categorized
+FROM film_category;
+
+19. Total rows in inventory.
+SELECT COUNT(*) AS total_rows
+FROM inventory;
+
+
+
+
+
